@@ -4,8 +4,6 @@ metadata:
   name: {{ include "movies.fullname" . }}
   labels:
     {{- include "movies.labels" . | nindent 4 }}
-  annotations:
-    dev.okteto.com/generate-host: "true"
 spec:
   rules:
     - host: {{ .Values.host }}
@@ -19,3 +17,6 @@ spec:
             backend:
               serviceName: frontend
               servicePort: 80
+  tls:
+  - hosts:
+    - {{ .Values.host }}
