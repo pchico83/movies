@@ -35,10 +35,15 @@ jobs:
         file: api/Dockerfile
 
     - name: Deploy
-      uses: WyriHaximus/github-action-helm3@v2
+      uses: deliverybot/helm@v1
       with:
-        exec: helm upgrade movies ./chart/ --install --wait --atomic --set=tag=${{ github.sha }},host=movies-pr-${{ github.event.number }}-${{ github.actor }}.cloud.okteto.net
-        kubeconfig: /github/home/.kube/config
+        release: movies
+        namespace: pr-${{ github.event.number }}-${{ github.actor }}
+        helm: helm3
+        chart: ./chart
+        values: |
+          tag: ${{ github.sha }}
+          host: movies-pr-${{ github.event.number }}-${{ github.actor }}.cloud.okteto.net
 
     - name: comment PR
       uses: okteto/notify-pr@master
