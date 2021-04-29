@@ -15,25 +15,30 @@ jobs:
       with:
         token: ${{ secrets.OKTETO_TOKEN }}
 
-    - name: "Build Frontend"
-      uses: okteto/build@master
-      with:
-        tag: okteto.dev/frontend:${{ github.sha }}
-
-    - name: "Build API"
-      uses: okteto/build@master
-      with:
-        tag: okteto.dev/api:${{ github.sha }}
-
     - name: Create namespace
       uses: okteto/create-namespace@master
       with:
         namespace: pr-${{ github.event.number }}-${{ github.actor }}
 
+    - name: "Build Frontend"
+      uses: okteto/build@master
+      with:
+        tag: okteto.dev/frontend:${{ github.sha }}
+        path: frontend
+        file: frontend/Dockerfile
+
+    - name: "Build API"
+      uses: okteto/build@master
+      with:
+        tag: okteto.dev/api:${{ github.sha }}
+        path: api
+        file: api/Dockerfile
+
     - name: Deploy
       uses: WyriHaximus/github-action-helm3@v2
       with:
         exec: helm upgrade movies ./chart/ --install --wait --atomic --set=tag=${{ github.sha }},host=movies-pr-${{ github.event.number }}-${{ github.actor }}.cloud.okteto.net
+        kubeconfig: /github/home/.kube/config
 
     - name: comment PR
       uses: okteto/notify-pr@master
